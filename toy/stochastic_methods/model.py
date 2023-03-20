@@ -17,12 +17,16 @@ import os
 # choose model
 def train_create_net(args):
 
-    if args.method == "regular":
-        return ToyNet(
+    if (
+            args.method == "regular" or args.method == "multiswag" or
+            args.method == "swa" or args.method == "swag"
+        ):
+        return ToyNetDropOut(
             num_hidden_layers=args.num_hidden_layers,
             hidden_dim=args.hidden_dim,
             input_dim=args.input_dim,
             num_classes=args.num_classes,
+            drop_rate=0,
         )
 
     if args.method == "dropout":
@@ -91,7 +95,8 @@ class ToyNetDropOut(nn.Module):
         self.hidden_dim = hidden_dim
         self.drop_rate = drop_rate
 
-        self.input = DropOutLinear(input_dim, hidden_dim, self.drop_rate)
+        #self.input = DropOutLinear(input_dim, hidden_dim, self.drop_rate)
+        self.input = nn.Linear(input_dim, hidden_dim)
         self.layers = nn.ModuleList(
             [
                 DropOutLinear(hidden_dim, hidden_dim, self.drop_rate)
@@ -124,7 +129,7 @@ class ToyNetNPDropOut(nn.Module):
         self.layers = nn.ModuleList(
             [NPDropOutLinear(hidden_dim, hidden_dim) for _ in range(num_hidden_layers - 1)]
         )
-        self.output = nn.Linear(hidden_dim, num_classes)
+        self.output = NPDropOutLinear(hidden_dim, num_classes)
 
     def forward(self, x):
 
@@ -147,7 +152,8 @@ class ToyNetDropConnect(nn.Module):
         self.hidden_dim = hidden_dim
         self.drop_rate = drop_rate
 
-        self.input = DropConnectLinear(input_dim, hidden_dim, drop_rate)
+        #self.input = DropConnectLinear(input_dim, hidden_dim, drop_rate)
+        self.input = nn.Linear(input_dim, hidden_dim)
         self.layers = nn.ModuleList(
             [
                 DropConnectLinear(hidden_dim, hidden_dim, drop_rate)

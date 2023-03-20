@@ -52,18 +52,19 @@ class ToyNetPyroPosterior(model.ToyNet, PyroModule):
         w_size = layer.weight.shape
         b_size = layer.bias.shape
 
-        layer.weight = PyroSample(
-            lambda self: Normal(mean, std).expand([w_size[0], w_size[1]]).to_event(2)
-        )
-        layer.bias = PyroSample(lambda self: Normal(mean, std).expand([b_size[0]]).to_event(1))
+        normal_dist = Normal(mean, std).expand([w_size[0], w_size[1]]).to_event(2)
+        layer.weight = PyroSample(normal_dist)
+
+        normal_dist = Normal(mean, std).expand([b_size[0]]).to_event(1)
+        layer.bias = PyroSample(normal_dist)
 
     def forward(self, x, y=None):
 
         batch = x.shape[0]
 
-        x = F.relu(self.input(x))
+        x = F.silu(self.input(x))
         for layer in self.layers:
-            x = F.relu(layer(x))
+            x = F.silu(layer(x))
         logits = self.output(x)
 
         # conditioned on the observed data

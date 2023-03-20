@@ -7,6 +7,7 @@ import torch
 import os
 import json
 import pathlib
+import dill
 
 # pyro
 import pyro
@@ -14,8 +15,9 @@ from pyro.infer.mcmc import MCMC, NUTS
 import pyro.poutine as poutine
 
 # import modules
-from data.datasets import ToyDataset
 import HMC.model as model
+from data.datasets import ToyDataset
+
 
 
 # train pyro model with HMC
@@ -32,19 +34,14 @@ def train_HMC(args):
     pyro.set_rng_seed(args.seed)
 
     # create the datasets
-    data_dir = os.path.join(args.output_dir, args.data_folder)
-    train_dataset = ToyDataset(
-        data_dir, num_data_train=args.num_data_train, num_data_eval=args.num_data_eval, mode="train"
-    )
-
-    # loaders
-    train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=len(train_dataset))
-
+    x_train = torch.load(pathlib.Path(os.path.join(args.data_folder, f"x_train_{args.case}.pt")))
+    y_train = torch.load(pathlib.Path(os.path.join(args.data_folder, f"y_train_{args.case}.pt")))
+    
     # device
     device = args.device
 
     # create the output folder
-    model_folder = os.path.join(args.output_dir, args.train_folder)
+    model_folder = os.path.join(args.output_dir, args.train_folder, f"{args.case}", "HMC")
     if not os.path.exists(model_folder):
         os.makedirs(model_folder)
 
@@ -62,8 +59,7 @@ def train_HMC(args):
 
     # posterior parameters and samples
     print("--------------TRUE POSTERIOR-------------------------")
-    (indices, x, y) = next(iter(train_loader))
-    x, y = x.to(device), y.to(device)
+    x, y = x_train.float().to(device), y_train.long().to(device)
     with poutine.trace() as tr:
         pyro_model(x)
     for site in tr.trace.nodes.values():
@@ -72,6 +68,9 @@ def train_HMC(args):
     # NUTS(HMC)
     nuts_kernel = NUTS(
         pyro_model,
+        step_size=args.step_size,
+        target_accept_prob = args.target_accept_prob,
+        adapt_step_size = args.adapt_step_size,
         jit_compile=False,
     )
     mcmc = MCMC(
@@ -80,6 +79,7 @@ def train_HMC(args):
         warmup_steps=args.warmup_steps,
         num_chains=args.number_chains,
         mp_context="spawn",
+        disable_progbar=True,
     )
     mcmc.run(x, y)
 
@@ -92,7 +92,19 @@ def train_HMC(args):
         print(v.shape)
         serialisable[k] = v.tolist()
 
-    model_file_name = str(pathlib.Path(os.path.join(model_folder, f"model_HMC.json")).absolute())
+    model_file_name = str(pathlib.Path(os.path.join(model_folder, f"model_HMC_chains_{args.number_chains}_s_{args.number_samples}_w_{args.warmup_steps}_ss_{args.step_size}.json")).absolute())
     print(f"Saving HMC models at {model_file_name}")
     with open(model_file_name, "w") as model_file:
         json.dump(serialisable, model_file)
+
+
+    # convergence statistics 
+    diag = mcmc.diagnostics()
+    model_file_name = str(pathlib.Path(os.path.join(model_folder, f"diagnostics_HMC_chains_{args.number_chains}_s_{args.number_samples}_w_{args.warmup_steps}_ss_{args.step_size}.dill")).absolute())
+    with open(model_file_name, 'wb') as f:
+	    dill.dump(diag, f)
+    
+    print(diag)
+    torch.cuda.empty_cache() 
+
+    

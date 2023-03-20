@@ -37,9 +37,10 @@ def parse_args():
     # mode
     parser.add_argument(
         "--method",
-        choices=["HMC", "regular", "dropout", "np_dropout", "dropconnect"],
-        default="regular",
+        choices=["HMC", "regular", "dropout", "np_dropout", "dropconnect", "multiswag"],
+        default="HMC",
     )
+    
 
     # data
     parser.add_argument(
@@ -49,6 +50,11 @@ def parse_args():
         "--num_data_eval", type=int, default=2000, help="Number of eval data points"
     )
 
+    parser.add_argument(
+        "--case", type=int, default=1, help="The data case number"
+    )
+
+
     # model
     parser.add_argument("--input_dim", type=int, default=2, help="Input data")
     parser.add_argument("--num_classes", type=int, default=2, help="Output classes")
@@ -57,11 +63,15 @@ def parse_args():
     )
     parser.add_argument("--num_hidden_layers", type=int, default=2, help="Number of hidden layers")
     parser.add_argument("--device", choices=["cpu", "cuda"], default="cuda", help='["cpu", "cuda"]')
+    
 
     # HMC
     parser.add_argument("--number_samples", type=int, default=2000, help="Number of HMC samples")
     parser.add_argument("--warmup_steps", type=int, default=2000, help="Warmup steps")
-    parser.add_argument("--number_chains", type=int, default=1, help="Parallel HMC chains")
+    parser.add_argument("--number_chains", type=int, default=4, help="Parallel HMC chains")
+    parser.add_argument("--step_size", type=float, default=1, help="Step size of NUTS")
+    parser.add_argument("--target_accept_prob", type=float, default=0.8, help="Target acceptance probability of step size adaptation scheme")
+    parser.add_argument("--adapt_step_size", type=str2bool, default=True, help="A flag to decide if we want to adapt step_size during warm-up phase using Dual Averaging scheme")
 
     # ens
     parser.add_argument("--num_nets", type=int, default=1024, help="Number of nets in the ensemble")
@@ -69,21 +79,27 @@ def parse_args():
     # training
     parser.add_argument("--lr", type=float, default=0.01, help="Learning rate")
     parser.add_argument("--train_batch", type=int, default=100, help="Training batch size")
-    parser.add_argument("--total_epochs", type=int, default=500, help="Number of epochs")
+    parser.add_argument("--total_epochs", type=int, default=5000, help="Number of epochs")
     parser.add_argument("--shuffle", type=str2bool, default=True, help="Shuffle the data")
     parser.add_argument("--drop_rate", type=float, default=0, help="Dropout rate")
     parser.add_argument("--lambda_prior", type=float, default=1.0, help="lambda prior value")
+
+    # swa and swag
+    parser.add_argument("--swa_swag_lr1", type=float, default=0.001, help="Top learning rate for swa and swag")
+    parser.add_argument("--swa_swag_lr2", type=float, default=0.001, help="Bottom learning rate for swa and swag")
+    parser.add_argument("--swa_swag_cycle_epochs", type=int, default=1, help="Number of epochs per swa(g) learning cycle")
+    parser.add_argument("--swa_swag_total_epochs", type=int, default=2000, help="Total number of epochs for swa(g) protocol")
 
     # general folders
     parser.add_argument("--output_dir", type=str, default="./output")
     parser.add_argument("--prefix", type=str, default="toy")
 
     # data folder
-    parser.add_argument("--data_folder", type=str, default="datasets/", help="Data folder")
+    parser.add_argument("--data_folder", type=str, default="/cephyr/users/olebal/Alvis/multimodal-ensemble-learning/toy/plot/HMC/data", help="Data folder")
 
     # train folder
     parser.add_argument(
-        "--train_folder", type=str, default=None, help="Folder for saving trained networks"
+        "--train_folder", type=str, default="/mimer/NOBACKUP/groups/snic2022-22-448/CVPR_revision/toy_olebal_SWAG_lr001", help="Folder for saving trained networks"
     )
 
     # debug mode?
@@ -102,7 +118,7 @@ def parse_args():
 
         args.number_samples = 10
         args.warmup_steps = 1
-        args.number_chains = 1
+        args.number_chains = 4
 
         args.num_nets = 2
 
@@ -129,11 +145,6 @@ def main():
     seed_index = torch.randint(1000, (1,)).item()
     args.seed = seed_index
     print("SEED: ", args.seed)
-
-    # create the output folder
-    model_folder = args.output_dir
-    if not os.path.exists(model_folder):
-        os.makedirs(model_folder)
 
     # wandb outputs
     group_name = "toy-" + wandb.util.generate_id()
