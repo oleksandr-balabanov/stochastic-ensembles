@@ -15,116 +15,150 @@ import os
 import argparse
 import json
 import pathlib
+import copy
 
-# load nets
-def load_nets(args):
+# run over one test dataset and save softmax outputs
+def save_softmax_probs(args):
 
-    model_folder = os.path.join(args.output_dir, args.train_folder)
-    nets = []
-    for model_id in range(args.num_samples_ens):
+    # in-domain [-1, 1]**2 or out-of-domain [-10, 10]**2
+    if args.domain == "in":
+        sf = 1
+    else:
+        sf = 10
 
-        net = model.train_create_net(args)
-        net.to(args.device)
-        net.train()
+    one_side = sf * torch.arange(-1, 1, 2/args.size_grid)
+    random_x = torch.cartesian_prod(one_side, one_side)
+    random_y = torch.zeros(args.size_grid**2).long()
 
-        model_path = os.path.join(model_folder, f"model_id_{model_id}.pt")
-        net.load_state_dict(torch.load(model_path))
-        nets.append(net)
-
-    return nets
-
-
-# run over the entire dataset and return softmax outputs
-def get_softmax_probs(args, nets, eval_dataset):
+    # dataset
+    eval_dataset = ToyDataset(random_x, random_y)
 
     # loaders
     eval_loader = torch.utils.data.DataLoader(
         eval_dataset, batch_size=args.eval_batch, shuffle=False
     )
-
+    
     # device
     device = args.device
 
-    # loop over the evaluation dataset
-    softmax_probs = torch.zeros(
-        len(nets) * args.num_samples_pass, len(eval_dataset), args.num_classes
-    ).to(device)
-    data = torch.zeros(len(eval_dataset), 2).to(device)
+
     with torch.no_grad():
+
+        nets = load_nets(args)
+        softmax_probs = torch.zeros(len(nets) * args.num_samples_pass, len(eval_dataset), args.num_classes).to(device)
+        data = torch.zeros(len(eval_dataset), 2).to(device)
         for (indices, x, y) in eval_loader:
 
             # batch
             x, y = x.to(device), y.to(device)
 
             # outputs
-            softmax_probs_batch = torch.zeros(
-                len(nets) * args.num_samples_pass, len(indices), args.num_classes
-            ).to(device)
+            softmax_probs_batch = torch.zeros(len(nets) * args.num_samples_pass, len(indices), args.num_classes).to(device)
             for model_id in range(args.num_samples_ens):
 
                 # do multiple stochastic forward passes and avarage
                 for i_pass in range(args.num_samples_pass):
                     logits = nets[model_id](x)
-                    softmax_probs_batch[
-                        i_pass + model_id * args.num_samples_pass, :, :
-                    ] = F.softmax(logits, dim=1)
+                    softmax_probs_batch[i_pass + model_id * args.num_samples_pass, :, :] = F.softmax(logits, dim=1)
 
             softmax_probs[:, indices, :] = softmax_probs_batch
             data[indices, :] = x
 
-    return data, softmax_probs
-
-
-# loop over the test datasets labeled by the scaling_factor variable and save softmax outputs
-def save_all_softmax_probs(args):
-    scaling_factors = [float(f) for f in args.eval_scaling_factors]
-    eval_folder = os.path.join(args.output_dir, args.eval_folder)
-    os.makedirs(eval_folder, exist_ok=True)
-    eval_folder_arg = os.path.join(eval_folder, "args.json")
-    open(eval_folder_arg, "w").write(json.dumps(args.__dict__, indent=2))
-    for scaling_factor in scaling_factors:
-        args_with_sf = dict(scaling_factor=scaling_factor, **args.__dict__)
-        namespace_with_sf = argparse.Namespace(**args_with_sf)
-        print(f"Eval torch {args.method} with scaling factor {scaling_factor}...")
-        save_softmax_probs(namespace_with_sf)
-
-
-# save_softmax_probs
-def save_softmax_probs(args):
-
-    # load the datasets
-    data_dir = os.path.join(args.output_dir, args.data_folder)
-    eval_dataset = ToyDataset(
-        data_dir,
-        num_data_train=args.num_data_train,
-        num_data_eval=args.num_data_eval,
-        mode="eval",
-        scaling_factor=args.scaling_factor,
-    )
-
-    # load nets
-    nets = load_nets(args)
-
-    # load softmax outputs
-    data, softmax_probs = get_softmax_probs(args, nets, eval_dataset)
-
     # save softmax_probs
-    model_folder = os.path.join(args.output_dir, args.eval_folder)
+    model_folder = create_folder(args, "eval_" + args.method)
     if not os.path.exists(model_folder):
         os.makedirs(model_folder)
     softmax_path = str(
         pathlib.Path(
-            os.path.join(
-                model_folder,
-                f"softmax_probs_{eval_dataset.get_identifier()}_num_pass_{args.num_samples_pass}.pt",
-            )
+            os.path.join(model_folder, f"softmax_probs_{args.method}_domain_{args.domain}_case_{args.case}.pt")
         ).absolute()
     )
     print(f"Saving softmax at {softmax_path}")
     torch.save(softmax_probs, softmax_path)
 
     # save data
-    torch.save(data, os.path.join(model_folder, f"data_{eval_dataset.get_identifier()}.pt"))
+    data_path = str(
+        pathlib.Path(
+            os.path.join(model_folder, f"data_{args.method}_domain_{args.domain}_case_{args.case}.pt")
+        ).absolute()
+    )
+    torch.save(data, data_path)
 
-    with open(os.path.join(model_folder, f"args_{eval_dataset.get_identifier()}.json"), "w") as f:
+
+# load nets
+def load_nets(args):
+
+    if args.method != "multiswag":
+        nets = []
+        model_folder = create_folder(args, args.method)
+        for model_id in range(args.num_samples_ens):
+
+            net = model.train_create_net(args)
+            model_path = os.path.join(model_folder, f"model_id_{model_id}.pt")
+            net.load_state_dict(torch.load(model_path))
+            net.to(args.device)
+            net.train()
+            nets.append(net)
+
+        return nets
+    else:
+        return load_multiswag_nets(args)
+
+
+
+# load nets
+def load_multiswag_nets(args):
+
+    nets = []
+    model_folder = create_folder(args, args.method)
+    for model_id in range(args.num_samples_ens):
+
+        model_path = os.path.join(model_folder, f"sum_model_{model_id}.pt")
+        sum_state_dict = torch.load(model_path)
+
+        model_path = os.path.join(model_folder, f"sum_sq_model_{model_id}.pt")
+        sum_square_state_dict = torch.load(model_path)
+
+        for i_swag in range(args.num_swag_samples):
+            
+            # swag sample
+            swag_sample = sample_swag_model(sum_state_dict, sum_square_state_dict, args.num_swa_models)
+
+            net = model.train_create_net(args)
+            net.load_state_dict(swag_sample)
+            net.to(args.device)
+            net.train()
+            nets.append(net)
+
+    return nets
+
+
+def sample_swag_model(sum_state_dict, sum_square_state_dict, num_swa_models, var_clamp=1e-16):
+
+    with torch.no_grad():
+        res = copy.deepcopy(sum_state_dict)
+        layer_names = list(sum_state_dict.keys())
+        for layer_name in layer_names:
+
+            var = sum_square_state_dict[layer_name]/num_swa_models - (sum_state_dict[layer_name]/num_swa_models)**2
+            var = torch.clamp(var, var_clamp)
+            res[layer_name] = torch.normal(
+                sum_state_dict[layer_name]/num_swa_models, # mean
+                torch.sqrt(var), # std
+            )
+
+    return res
+
+
+def create_folder(args, method):
+
+    # create the output folder
+    model_folder = os.path.join(args.output_dir, f"{args.case}", method)
+    if not os.path.exists(model_folder):
+        os.makedirs(model_folder)
+
+    args_file = pathlib.Path(os.path.join(model_folder, "args.json"))
+    with open(args_file, "w") as f:
         f.write(json.dumps(args.__dict__, indent=2))
+
+    return model_folder

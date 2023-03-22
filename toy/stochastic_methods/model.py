@@ -18,8 +18,8 @@ import os
 def train_create_net(args):
 
     if (
-            args.method == "regular" or args.method == "multiswag" or
-            args.method == "swa" or args.method == "swag"
+            args.method == "regular" or args.method == "multiswa" or
+            args.method == "multiswag"
         ):
         return ToyNetDropOut(
             num_hidden_layers=args.num_hidden_layers,

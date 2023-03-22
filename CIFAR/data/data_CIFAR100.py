@@ -10,46 +10,42 @@ import numpy as np
 
 # unpickle file
 def unpickle(file):
-    file_pickle = open(file, "rb")
-    return pickle.load(file_pickle, encoding="latin1")
+    file_pickle = open (file, "rb")
+    return pickle.load(file_pickle, encoding='latin1')
 
 
 # download cifar100
 def get_cifar100(data_dir):
-
+    
     """
 
     LOAD CIFAR100
 
     Input: data_dir
-    Output: train_valid_data, test_dataset
+    Output: train_valid_data, test_dataset 
 
     """
 
     # CIFAR TRAIN DATA
-    train_batch = unpickle(os.path.join(data_dir, "CIFAR/cifar-100-python/train"))
+    train_batch = unpickle( os.path.join(data_dir, 'CIFAR/cifar-100-python/train'))
 
-    train_data = torch.Tensor(train_batch["data"].reshape(-1, 3, 32, 32))
-    train_labels = torch.Tensor(train_batch["fine_labels"]).long()
+    train_data = torch.Tensor(train_batch['data'].reshape(-1, 3, 32, 32))
+    train_labels = torch.Tensor(train_batch['fine_labels']).long()
+
 
     # CIFAR TEST DATA
-    test_batch = unpickle(os.path.join(data_dir, "CIFAR/cifar-100-python/test"))
+    test_batch = unpickle(os.path.join(data_dir, 'CIFAR/cifar-100-python/test'))
 
-    test_data = torch.Tensor(test_batch["data"].reshape(-1, 3, 32, 32))
-    test_labels = torch.Tensor(test_batch["fine_labels"]).long()
+    test_data = torch.Tensor(test_batch['data'].reshape(-1, 3, 32, 32))
+    test_labels = torch.Tensor(test_batch['fine_labels']).long()
+
 
     return [train_data, train_labels], [test_data, test_labels]
 
 
-# create torch datasets
-def create_datasets(
-    train_data,
-    test_data,
-    num_train,
-    shuffle=True,
-    do_augmentation_train=False,
-    do_augmentation_test=False,
-):
+
+# create torch datasets    
+def create_datasets(train_data, test_data, num_train, shuffle = True, do_augmentation_train = False, do_augmentation_test = False):
 
     """
 
@@ -58,7 +54,7 @@ def create_datasets(
     Input: train_data, test_data, num_train, shuffle = True, do_augmentation_train = False, do_augmentation_test = False
     Output: train_dataset, valid_dataset, test_dataset
 
-    """
+    """ 
 
     # PREPROCESS
     # shuffle
@@ -69,6 +65,7 @@ def create_datasets(
     else:
         shuffled_images = train_data[0]
         shuffled_labels = train_data[1]
+
 
     # training set
     train_images = shuffled_images.type(torch.float)[:num_train]
@@ -81,56 +78,51 @@ def create_datasets(
     # test set
     test_images = test_data[0].type(torch.float)
     test_labels = test_data[1]
-
+    
     # datasets
-    train_dataset = preprocessed_CIFAR100_dataset(
-        train_images, train_labels, test=False, do_augmentation=do_augmentation_train
-    )
-    valid_dataset = preprocessed_CIFAR100_dataset(
-        valid_images, valid_labels, test=False, do_augmentation=do_augmentation_train
-    )
-    test_dataset = preprocessed_CIFAR100_dataset(
-        test_images, test_labels, test=True, do_augmentation=do_augmentation_test
-    )
+    train_dataset = preprocessed_CIFAR100_dataset(train_images, train_labels, test = False, do_augmentation = do_augmentation_train)
+    valid_dataset = preprocessed_CIFAR100_dataset(valid_images, valid_labels, test = False, do_augmentation = do_augmentation_train)
+    test_dataset = preprocessed_CIFAR100_dataset(test_images, test_labels, test = True, do_augmentation = do_augmentation_test)
 
     return train_dataset, valid_dataset, test_dataset
 
 
-# train transform
+
+ # train transform
 def train_transform(do_augmentation):
     if do_augmentation == True:
-        return transforms.Compose(
-            [
-                transforms.RandomCrop(32, padding=4),
-                transforms.RandomHorizontalFlip(),
-                transforms.Normalize(mean=[0.5071, 0.4867, 0.4408], std=[0.2673, 0.2564, 0.2762]),
-            ]
-        )
+        return transforms.Compose([
+                    transforms.RandomCrop(32, padding=4),
+                    transforms.RandomHorizontalFlip(),
+                    transforms.Normalize(mean=[0.49, 0.48, 0.44],
+                                        std=[0.2, 0.2, 0.2])
+                    ])
     else:
-        return transforms.Compose(
-            [transforms.Normalize(mean=[0.5071, 0.4867, 0.4408], std=[0.2673, 0.2564, 0.2762])]
-        )
+        return transforms.Compose([
+            transforms.Normalize(mean=[0.49, 0.48, 0.44],
+                                std=[0.2, 0.2, 0.2])
+            ])
 
 
 # test transform
 def test_transform(do_augmentation):
     if do_augmentation == True:
-        return transforms.Compose(
-            [
-                transforms.RandomCrop(32, padding=4),
-                transforms.RandomHorizontalFlip(),
-                transforms.Normalize(mean=[0.5071, 0.4867, 0.4408], std=[0.2673, 0.2564, 0.2762]),
-            ]
-        )
+        return transforms.Compose([
+                    transforms.RandomCrop(32, padding=4),
+                    transforms.RandomHorizontalFlip(),
+                    transforms.Normalize(mean=[0.49, 0.48, 0.44],
+                                        std=[0.2, 0.2, 0.2])
+                    ])
     else:
-        return transforms.Compose(
-            [transforms.Normalize(mean=[0.5071, 0.4867, 0.4408], std=[0.2673, 0.2564, 0.2762])]
-        )
+        return transforms.Compose([
+            transforms.Normalize(mean=[0.49, 0.48, 0.44],
+                                std=[0.2, 0.2, 0.2])
+            ])        
 
-
-# preprocess the images
+# preprocess the images 
 class preprocessed_CIFAR100_dataset(Dataset):
-    def __init__(self, x, y, test=False, do_augmentation=False):
+
+    def __init__(self, x, y, test = False, do_augmentation = False):
         self.data = x.type(torch.float) / 255
         self.target = y
 

@@ -1,0 +1,37 @@
+This job can be monitored from: https://scruffy.c3se.chalmers.se/d/alvis-job/alvis-job?var-jobid=881460&from=1679453494000
+################################################################################
+Running slurm job
+################################################################################
+INFO:    underlay of /usr/bin/nvidia-smi required more than 50 (564) bind mounts
+INFO:    underlay of /usr/share/lmod/lmod required more than 50 (92) bind mounts
+SEED:  tensor([857])
+CIFAR mode:  CIFAR10
+stochastic method:  regular
+Corruption [0:16] fog.npy, level 0
+Corruption [0:16] fog.npy, level 1
+Corruption [0:16] fog.npy, level 2
+Corruption [0:16] fog.npy, level 3
+Corruption [0:16] fog.npy, level 4
+Corruption [1:16] zoom_blur.npy, level 0
+Corruption [1:16] zoom_blur.npy, level 1
+Corruption [1:16] zoom_blur.npy, level 2
+Corruption [1:16] zoom_blur.npy, level 3
+Corruption [1:16] zoom_blur.npy, level 4
+Corruption [2:16] speckle_noise.npy, level 0
+Corruption [2:16] speckle_noise.npy, level 1
+Corruption [2:16] speckle_noise.npy, level 2
+Corruption [2:16] speckle_noise.npy, level 3
+Corruption [2:16] speckle_noise.npy, level 4
+Corruption [3:16] glass_blur.npy, level 0
+Corruption [3:16] glass_blur.npy, level 1
+Corruption [3:16] glass_blur.npy, level 2
+Corruption [3:16] glass_blur.npy, level 3
+Corruption [3:16] glass_blur.npy, level 4
+Corruption [4:16] spatter.npy, level 0
+Corruption [4:16] spatter.npy, level 1
+Corruption [4:16] spatter.npy, level 2
+Corruption [4:16] spatter.npy, level 3
+Corruption [4:16] spatter.npy, level 4
+Corruption [5:16] shot_noise.npy, level 0
+Corruption [5:16] shot_noise.npy, level 1
+Corruption [5:16] shot_noise.npy, level 2

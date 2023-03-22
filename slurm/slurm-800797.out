@@ -1,0 +1,5 @@
+This job can be monitored from: https://scruffy.c3se.chalmers.se/d/alvis-job/alvis-job?var-jobid=800797&from=1675791696000
+################################################################################
+Running slurm job
+################################################################################
+/tmp/slurmd/job800797/slurm_script: line 14: cd: /cephyr/users/olebal/Alvis/stochastic_ensembles/CIFAR/: No such file or directory

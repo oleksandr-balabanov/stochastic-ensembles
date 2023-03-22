@@ -4,14 +4,8 @@
 
 """
 
-import os
-
 # torch
 import torch
-
-# other
-import numpy as np
-import pickle
 
 # create the dataset
 class ToyDataset(torch.utils.data.Dataset):

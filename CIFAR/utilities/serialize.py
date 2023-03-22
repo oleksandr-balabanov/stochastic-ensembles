@@ -32,14 +32,12 @@ def save_tmp(data):
     os.close(fdhandle)
     return path
 
-
 def sanitize_dict(data):
     ret = dict(data)
     for key, val in data.items():
         if callable(val):
             del ret[key]
     return ret
-
 
 def dataclass_to_normalized_json(data):
     return json.loads(pandas.json_normalize(asdict(data)).to_json(orient="records"))[0]

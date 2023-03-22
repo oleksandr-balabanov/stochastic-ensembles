@@ -17,28 +17,28 @@ def create_resnet20(args):
     else:
         num_classes = 100
 
-    if args.method == "regular":
+    if args.method == "regular" or args.method == "multiswa" or args.method == "multiswag":    
         return dropout.dropout_resnet20(
-            num_classes=num_classes,
-            drop_rate_conv=0,
-            drop_rate_linear=0,
-        )
+                num_classes = num_classes,
+                drop_rate_conv = 0,
+                drop_rate_linear = 0,
+            )
 
-    if args.method == "dropout":
+    if args.method == "dropout":    
         return dropout.dropout_resnet20(
-            num_classes=num_classes,
-            drop_rate_conv=args.drop_rate_conv,
-            drop_rate_linear=args.drop_rate_linear,
-        )
+                num_classes = num_classes,
+                drop_rate_conv = args.drop_rate_conv, 
+                drop_rate_linear = args.drop_rate_linear,     
+            )
 
-    if args.method == "np_dropout":
+    if args.method == "np_dropout":    
         return np_dropout.np_dropout_resnet20(
-            num_classes=num_classes,
-        )
+                num_classes = num_classes, 
+            )
 
-    if args.method == "dropconnect":
+    if args.method == "dropconnect":    
         return dropconnect.dropconnect_resnet20(
-            num_classes=num_classes,
-            drop_rate_conv=args.drop_rate_conv,
-            drop_rate_linear=args.drop_rate_linear,
-        )
+                num_classes = num_classes, 
+                drop_rate_conv = args.drop_rate_conv, 
+                drop_rate_linear = args.drop_rate_linear,  
+            )

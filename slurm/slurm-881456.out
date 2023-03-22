@@ -1,0 +1,257 @@
+This job can be monitored from: https://scruffy.c3se.chalmers.se/d/alvis-job/alvis-job?var-jobid=881456&from=1679452921000
+################################################################################
+Running slurm job
+################################################################################
+INFO:    underlay of /usr/bin/nvidia-smi required more than 50 (564) bind mounts
+INFO:    underlay of /usr/share/lmod/lmod required more than 50 (92) bind mounts
+SEED:  tensor([889])
+CIFAR mode:  CIFAR10
+stochastic method:  multiswa
+Corruption [0:16] fog.npy, level 0
+Corruption [0:16] fog.npy, level 1
+Corruption [0:16] fog.npy, level 2
+Corruption [0:16] fog.npy, level 3
+Corruption [0:16] fog.npy, level 4
+Corruption [1:16] zoom_blur.npy, level 0
+Corruption [1:16] zoom_blur.npy, level 1
+Corruption [1:16] zoom_blur.npy, level 2
+Corruption [1:16] zoom_blur.npy, level 3
+Corruption [1:16] zoom_blur.npy, level 4
+Corruption [2:16] speckle_noise.npy, level 0
+Corruption [2:16] speckle_noise.npy, level 1
+Corruption [2:16] speckle_noise.npy, level 2
+Corruption [2:16] speckle_noise.npy, level 3
+Corruption [2:16] speckle_noise.npy, level 4
+Corruption [3:16] glass_blur.npy, level 0
+Corruption [3:16] glass_blur.npy, level 1
+Corruption [3:16] glass_blur.npy, level 2
+Corruption [3:16] glass_blur.npy, level 3
+Corruption [3:16] glass_blur.npy, level 4
+Corruption [4:16] spatter.npy, level 0
+Corruption [4:16] spatter.npy, level 1
+Corruption [4:16] spatter.npy, level 2
+Corruption [4:16] spatter.npy, level 3
+Corruption [4:16] spatter.npy, level 4
+Corruption [5:16] shot_noise.npy, level 0
+Corruption [5:16] shot_noise.npy, level 1
+Corruption [5:16] shot_noise.npy, level 2
+Corruption [5:16] shot_noise.npy, level 3
+Corruption [5:16] shot_noise.npy, level 4
+Corruption [6:16] defocus_blur.npy, level 0
+Corruption [6:16] defocus_blur.npy, level 1
+Corruption [6:16] defocus_blur.npy, level 2
+Corruption [6:16] defocus_blur.npy, level 3
+Corruption [6:16] defocus_blur.npy, level 4
+Corruption [7:16] elastic_transform.npy, level 0
+Corruption [7:16] elastic_transform.npy, level 1
+Corruption [7:16] elastic_transform.npy, level 2
+Corruption [7:16] elastic_transform.npy, level 3
+Corruption [7:16] elastic_transform.npy, level 4
+Corruption [8:16] gaussian_blur.npy, level 0
+Corruption [8:16] gaussian_blur.npy, level 1
+Corruption [8:16] gaussian_blur.npy, level 2
+Corruption [8:16] gaussian_blur.npy, level 3
+Corruption [8:16] gaussian_blur.npy, level 4
+Corruption [9:16] frost.npy, level 0
+Corruption [9:16] frost.npy, level 1
+Corruption [9:16] frost.npy, level 2
+Corruption [9:16] frost.npy, level 3
+Corruption [9:16] frost.npy, level 4
+Corruption [10:16] saturate.npy, level 0
+Corruption [10:16] saturate.npy, level 1
+Corruption [10:16] saturate.npy, level 2
+Corruption [10:16] saturate.npy, level 3
+Corruption [10:16] saturate.npy, level 4
+Corruption [11:16] brightness.npy, level 0
+Corruption [11:16] brightness.npy, level 1
+Corruption [11:16] brightness.npy, level 2
+Corruption [11:16] brightness.npy, level 3
+Corruption [11:16] brightness.npy, level 4
+Corruption [12:16] gaussian_noise.npy, level 0
+Corruption [12:16] gaussian_noise.npy, level 1
+Corruption [12:16] gaussian_noise.npy, level 2
+Corruption [12:16] gaussian_noise.npy, level 3
+Corruption [12:16] gaussian_noise.npy, level 4
+Corruption [13:16] contrast.npy, level 0
+Corruption [13:16] contrast.npy, level 1
+Corruption [13:16] contrast.npy, level 2
+Corruption [13:16] contrast.npy, level 3
+Corruption [13:16] contrast.npy, level 4
+Corruption [14:16] impulse_noise.npy, level 0
+Corruption [14:16] impulse_noise.npy, level 1
+Corruption [14:16] impulse_noise.npy, level 2
+Corruption [14:16] impulse_noise.npy, level 3
+Corruption [14:16] impulse_noise.npy, level 4
+Corruption [15:16] pixelate.npy, level 0
+Corruption [15:16] pixelate.npy, level 1
+Corruption [15:16] pixelate.npy, level 2
+Corruption [15:16] pixelate.npy, level 3
+Corruption [15:16] pixelate.npy, level 4
+TEST SET ENSEMBLE: Avg. predictive loss: 0.4130, Accuracy: 8737/10000 (87%)
+
+AUC ROC CIFAR10 + CIFAR100: 0.8160
+
+AUC ROC CIFAR10 + SVHN: 0.7818
+
+ECE: 0.0154
+
+TEST SET ENSEMBLE: Corruption: fog.npy, Level: 0,  Avg. predictive loss: 0.4188, Accuracy: 8740/10000 (87%)
+
+TEST SET ENSEMBLE: Corruption: fog.npy, Level: 1,  Avg. predictive loss: 0.4508, Accuracy: 8626/10000 (86%)
+
+TEST SET ENSEMBLE: Corruption: fog.npy, Level: 2,  Avg. predictive loss: 0.4983, Accuracy: 8492/10000 (85%)
+
+TEST SET ENSEMBLE: Corruption: fog.npy, Level: 3,  Avg. predictive loss: 0.5851, Accuracy: 8207/10000 (82%)
+
+TEST SET ENSEMBLE: Corruption: fog.npy, Level: 4,  Avg. predictive loss: 0.9572, Accuracy: 7160/10000 (72%)
+
+TEST SET ENSEMBLE: Corruption: zoom_blur.npy, Level: 0,  Avg. predictive loss: 0.5548, Accuracy: 8290/10000 (83%)
+
+TEST SET ENSEMBLE: Corruption: zoom_blur.npy, Level: 1,  Avg. predictive loss: 0.6139, Accuracy: 8131/10000 (81%)
+
+TEST SET ENSEMBLE: Corruption: zoom_blur.npy, Level: 2,  Avg. predictive loss: 0.7204, Accuracy: 7832/10000 (78%)
+
+TEST SET ENSEMBLE: Corruption: zoom_blur.npy, Level: 3,  Avg. predictive loss: 0.8615, Accuracy: 7448/10000 (74%)
+
+TEST SET ENSEMBLE: Corruption: zoom_blur.npy, Level: 4,  Avg. predictive loss: 1.0815, Accuracy: 6935/10000 (69%)
+
+TEST SET ENSEMBLE: Corruption: speckle_noise.npy, Level: 0,  Avg. predictive loss: 0.5412, Accuracy: 8351/10000 (84%)
+
+TEST SET ENSEMBLE: Corruption: speckle_noise.npy, Level: 1,  Avg. predictive loss: 0.8026, Accuracy: 7627/10000 (76%)
+
+TEST SET ENSEMBLE: Corruption: speckle_noise.npy, Level: 2,  Avg. predictive loss: 0.9427, Accuracy: 7266/10000 (73%)
+
+TEST SET ENSEMBLE: Corruption: speckle_noise.npy, Level: 3,  Avg. predictive loss: 1.3250, Accuracy: 6386/10000 (64%)
+
+TEST SET ENSEMBLE: Corruption: speckle_noise.npy, Level: 4,  Avg. predictive loss: 1.6974, Accuracy: 5546/10000 (55%)
+
+TEST SET ENSEMBLE: Corruption: glass_blur.npy, Level: 0,  Avg. predictive loss: 1.3847, Accuracy: 5944/10000 (59%)
+
+TEST SET ENSEMBLE: Corruption: glass_blur.npy, Level: 1,  Avg. predictive loss: 1.3425, Accuracy: 6101/10000 (61%)
+
+TEST SET ENSEMBLE: Corruption: glass_blur.npy, Level: 2,  Avg. predictive loss: 1.2349, Accuracy: 6390/10000 (64%)
+
+TEST SET ENSEMBLE: Corruption: glass_blur.npy, Level: 3,  Avg. predictive loss: 1.8980, Accuracy: 4932/10000 (49%)
+
+TEST SET ENSEMBLE: Corruption: glass_blur.npy, Level: 4,  Avg. predictive loss: 1.7820, Accuracy: 5139/10000 (51%)
+
+TEST SET ENSEMBLE: Corruption: spatter.npy, Level: 0,  Avg. predictive loss: 0.4935, Accuracy: 8463/10000 (85%)
+
+TEST SET ENSEMBLE: Corruption: spatter.npy, Level: 1,  Avg. predictive loss: 0.6253, Accuracy: 8097/10000 (81%)
+
+TEST SET ENSEMBLE: Corruption: spatter.npy, Level: 2,  Avg. predictive loss: 0.7379, Accuracy: 7724/10000 (77%)
+
+TEST SET ENSEMBLE: Corruption: spatter.npy, Level: 3,  Avg. predictive loss: 0.6805, Accuracy: 7946/10000 (79%)
+
+TEST SET ENSEMBLE: Corruption: spatter.npy, Level: 4,  Avg. predictive loss: 0.8554, Accuracy: 7392/10000 (74%)
+
+TEST SET ENSEMBLE: Corruption: shot_noise.npy, Level: 0,  Avg. predictive loss: 0.5364, Accuracy: 8360/10000 (84%)
+
+TEST SET ENSEMBLE: Corruption: shot_noise.npy, Level: 1,  Avg. predictive loss: 0.6849, Accuracy: 7928/10000 (79%)
+
+TEST SET ENSEMBLE: Corruption: shot_noise.npy, Level: 2,  Avg. predictive loss: 1.1216, Accuracy: 6860/10000 (69%)
+
+TEST SET ENSEMBLE: Corruption: shot_noise.npy, Level: 3,  Avg. predictive loss: 1.3084, Accuracy: 6368/10000 (64%)
+
+TEST SET ENSEMBLE: Corruption: shot_noise.npy, Level: 4,  Avg. predictive loss: 1.6918, Accuracy: 5625/10000 (56%)
+
+TEST SET ENSEMBLE: Corruption: defocus_blur.npy, Level: 0,  Avg. predictive loss: 0.4162, Accuracy: 8726/10000 (87%)
+
+TEST SET ENSEMBLE: Corruption: defocus_blur.npy, Level: 1,  Avg. predictive loss: 0.4439, Accuracy: 8625/10000 (86%)
+
+TEST SET ENSEMBLE: Corruption: defocus_blur.npy, Level: 2,  Avg. predictive loss: 0.5259, Accuracy: 8379/10000 (84%)
+
+TEST SET ENSEMBLE: Corruption: defocus_blur.npy, Level: 3,  Avg. predictive loss: 0.6803, Accuracy: 7906/10000 (79%)
+
+TEST SET ENSEMBLE: Corruption: defocus_blur.npy, Level: 4,  Avg. predictive loss: 1.0064, Accuracy: 6999/10000 (70%)
+
+TEST SET ENSEMBLE: Corruption: elastic_transform.npy, Level: 0,  Avg. predictive loss: 0.5515, Accuracy: 8293/10000 (83%)
+
+TEST SET ENSEMBLE: Corruption: elastic_transform.npy, Level: 1,  Avg. predictive loss: 0.5450, Accuracy: 8334/10000 (83%)
+
+TEST SET ENSEMBLE: Corruption: elastic_transform.npy, Level: 2,  Avg. predictive loss: 0.6060, Accuracy: 8087/10000 (81%)
+
+TEST SET ENSEMBLE: Corruption: elastic_transform.npy, Level: 3,  Avg. predictive loss: 0.7523, Accuracy: 7699/10000 (77%)
+
+TEST SET ENSEMBLE: Corruption: elastic_transform.npy, Level: 4,  Avg. predictive loss: 0.8653, Accuracy: 7332/10000 (73%)
+
+TEST SET ENSEMBLE: Corruption: gaussian_blur.npy, Level: 0,  Avg. predictive loss: 0.4161, Accuracy: 8725/10000 (87%)
+
+TEST SET ENSEMBLE: Corruption: gaussian_blur.npy, Level: 1,  Avg. predictive loss: 0.5276, Accuracy: 8380/10000 (84%)
+
+TEST SET ENSEMBLE: Corruption: gaussian_blur.npy, Level: 2,  Avg. predictive loss: 0.6611, Accuracy: 8005/10000 (80%)
+
+TEST SET ENSEMBLE: Corruption: gaussian_blur.npy, Level: 3,  Avg. predictive loss: 0.8370, Accuracy: 7459/10000 (75%)
+
+TEST SET ENSEMBLE: Corruption: gaussian_blur.npy, Level: 4,  Avg. predictive loss: 1.2917, Accuracy: 6367/10000 (64%)
+
+TEST SET ENSEMBLE: Corruption: frost.npy, Level: 0,  Avg. predictive loss: 0.5016, Accuracy: 8462/10000 (85%)
+
+TEST SET ENSEMBLE: Corruption: frost.npy, Level: 1,  Avg. predictive loss: 0.6112, Accuracy: 8107/10000 (81%)
+
+TEST SET ENSEMBLE: Corruption: frost.npy, Level: 2,  Avg. predictive loss: 0.8209, Accuracy: 7547/10000 (75%)
+
+TEST SET ENSEMBLE: Corruption: frost.npy, Level: 3,  Avg. predictive loss: 0.8393, Accuracy: 7515/10000 (75%)
+
+TEST SET ENSEMBLE: Corruption: frost.npy, Level: 4,  Avg. predictive loss: 1.0723, Accuracy: 6932/10000 (69%)
+
+TEST SET ENSEMBLE: Corruption: saturate.npy, Level: 0,  Avg. predictive loss: 0.4803, Accuracy: 8534/10000 (85%)
+
+TEST SET ENSEMBLE: Corruption: saturate.npy, Level: 1,  Avg. predictive loss: 0.5755, Accuracy: 8244/10000 (82%)
+
+TEST SET ENSEMBLE: Corruption: saturate.npy, Level: 2,  Avg. predictive loss: 0.4275, Accuracy: 8686/10000 (87%)
+
+TEST SET ENSEMBLE: Corruption: saturate.npy, Level: 3,  Avg. predictive loss: 0.4741, Accuracy: 8578/10000 (86%)
+
+TEST SET ENSEMBLE: Corruption: saturate.npy, Level: 4,  Avg. predictive loss: 0.5330, Accuracy: 8402/10000 (84%)
+
+TEST SET ENSEMBLE: Corruption: brightness.npy, Level: 0,  Avg. predictive loss: 0.4153, Accuracy: 8726/10000 (87%)
+
+TEST SET ENSEMBLE: Corruption: brightness.npy, Level: 1,  Avg. predictive loss: 0.4271, Accuracy: 8693/10000 (87%)
+
+TEST SET ENSEMBLE: Corruption: brightness.npy, Level: 2,  Avg. predictive loss: 0.4453, Accuracy: 8640/10000 (86%)
+
+TEST SET ENSEMBLE: Corruption: brightness.npy, Level: 3,  Avg. predictive loss: 0.4705, Accuracy: 8571/10000 (86%)
+
+TEST SET ENSEMBLE: Corruption: brightness.npy, Level: 4,  Avg. predictive loss: 0.5417, Accuracy: 8340/10000 (83%)
+
+TEST SET ENSEMBLE: Corruption: gaussian_noise.npy, Level: 0,  Avg. predictive loss: 0.6360, Accuracy: 8046/10000 (80%)
+
+TEST SET ENSEMBLE: Corruption: gaussian_noise.npy, Level: 1,  Avg. predictive loss: 0.9683, Accuracy: 7236/10000 (72%)
+
+TEST SET ENSEMBLE: Corruption: gaussian_noise.npy, Level: 2,  Avg. predictive loss: 1.3678, Accuracy: 6213/10000 (62%)
+
+TEST SET ENSEMBLE: Corruption: gaussian_noise.npy, Level: 3,  Avg. predictive loss: 1.5745, Accuracy: 5777/10000 (58%)
+
+TEST SET ENSEMBLE: Corruption: gaussian_noise.npy, Level: 4,  Avg. predictive loss: 1.8129, Accuracy: 5240/10000 (52%)
+
+TEST SET ENSEMBLE: Corruption: contrast.npy, Level: 0,  Avg. predictive loss: 0.4308, Accuracy: 8694/10000 (87%)
+
+TEST SET ENSEMBLE: Corruption: contrast.npy, Level: 1,  Avg. predictive loss: 0.5094, Accuracy: 8460/10000 (85%)
+
+TEST SET ENSEMBLE: Corruption: contrast.npy, Level: 2,  Avg. predictive loss: 0.5898, Accuracy: 8247/10000 (82%)
+
+TEST SET ENSEMBLE: Corruption: contrast.npy, Level: 3,  Avg. predictive loss: 0.7467, Accuracy: 7802/10000 (78%)
+
+TEST SET ENSEMBLE: Corruption: contrast.npy, Level: 4,  Avg. predictive loss: 1.3917, Accuracy: 6251/10000 (63%)
+
+TEST SET ENSEMBLE: Corruption: impulse_noise.npy, Level: 0,  Avg. predictive loss: 0.6081, Accuracy: 8140/10000 (81%)
+
+TEST SET ENSEMBLE: Corruption: impulse_noise.npy, Level: 1,  Avg. predictive loss: 0.8152, Accuracy: 7471/10000 (75%)
+
+TEST SET ENSEMBLE: Corruption: impulse_noise.npy, Level: 2,  Avg. predictive loss: 1.0694, Accuracy: 6777/10000 (68%)
+
+TEST SET ENSEMBLE: Corruption: impulse_noise.npy, Level: 3,  Avg. predictive loss: 1.6339, Accuracy: 5371/10000 (54%)
+
+TEST SET ENSEMBLE: Corruption: impulse_noise.npy, Level: 4,  Avg. predictive loss: 2.2274, Accuracy: 4199/10000 (42%)
+
+TEST SET ENSEMBLE: Corruption: pixelate.npy, Level: 0,  Avg. predictive loss: 0.4653, Accuracy: 8556/10000 (86%)
+
+TEST SET ENSEMBLE: Corruption: pixelate.npy, Level: 1,  Avg. predictive loss: 0.5410, Accuracy: 8362/10000 (84%)
+
+TEST SET ENSEMBLE: Corruption: pixelate.npy, Level: 2,  Avg. predictive loss: 0.5572, Accuracy: 8280/10000 (83%)
+
+TEST SET ENSEMBLE: Corruption: pixelate.npy, Level: 3,  Avg. predictive loss: 0.6827, Accuracy: 7910/10000 (79%)
+
+TEST SET ENSEMBLE: Corruption: pixelate.npy, Level: 4,  Avg. predictive loss: 0.9841, Accuracy: 7100/10000 (71%)
+

@@ -1,5 +1,7 @@
 """
-	EVAL THE MODEL (PYRO)
+
+	EVAL THE HMC MODEL
+
 """
 
 # torch
@@ -16,41 +18,33 @@ import argparse
 import json
 import pathlib
 
-# loop over the test datasets labeled by the scaling_factor variable and save softmax outputs
-def save_all_softmax_probs_HMC(args):
-    scaling_factors = [float(f) for f in args.eval_scaling_factors]
-    eval_folder = os.path.join(args.output_dir, args.eval_folder)
-    os.makedirs(eval_folder, exist_ok=True)
-    eval_folder_arg = os.path.join(eval_folder, "args.json")
-    open(eval_folder_arg, "w").write(json.dumps(args.__dict__, indent=2))
-    for scaling_factor in scaling_factors:
-        args_with_sf = dict(scaling_factor=scaling_factor, **args.__dict__)
-        namespace_with_sf = argparse.Namespace(**args_with_sf)
-        print(f"Eval HMC with scaling factor {scaling_factor}...")
-        save_softmax_probs_HMC(namespace_with_sf)
-
 
 # run over one test dataset and save softmax outputs
 def save_softmax_probs_HMC(args):
 
-    # create the datasets
-    data_dir = os.path.join(args.output_dir, args.data_folder)
-    eval_dataset = ToyDataset(
-        data_dir,
-        num_data_train=args.num_data_train,
-        num_data_eval=args.num_data_eval,
-        mode="eval",
-        scaling_factor=args.scaling_factor,
-    )
+
+    # in-domain [-1, 1]**2 or out-of-domain [-10, 10]**2
+    if args.domain == "in":
+        sf = 1
+    else:
+        sf = 10
+
+    one_side = sf * torch.arange(-1, 1, 2/args.size_grid)
+    random_x = torch.cartesian_prod(one_side, one_side)
+    random_y = torch.zeros(args.size_grid**2).long()
+
+    # dataset
+    eval_dataset = ToyDataset(random_x, random_y)
 
     # loaders
     eval_loader = torch.utils.data.DataLoader(
         eval_dataset, batch_size=args.eval_batch, shuffle=False
     )
-
+    
     # read HMC data
-    model_folder = os.path.join(args.output_dir, args.train_folder)
-    model_file_name = os.path.join(model_folder, f"model_HMC.json")
+    model_folder = os.path.join(args.output_dir, f"{args.case}", "HMC")
+    model_file_name = str(pathlib.Path(os.path.join(model_folder, f"model_HMC_chains_{args.number_chains}_s_{args.number_samples}_w_{args.warmup_steps}_case_{args.case}.json")).absolute())
+    
     with open(model_file_name, "r") as model_file:
         samples = json.load(model_file)
 
@@ -70,14 +64,12 @@ def save_softmax_probs_HMC(args):
         print("the name of the dictionary is ", name)
 
     # loop over the HMC realizations
-    softmax_probs = torch.zeros(args.num_samples_HMC, len(eval_dataset), args.num_classes).to(
-        device
-    )
+    softmax_probs = torch.zeros(args.total_num_samples_HMC, len(eval_dataset), args.num_classes).to(device)
     data = torch.zeros(len(eval_dataset), 2).to(device)
     with torch.no_grad():
         correct = 0
         total = 0
-        for inet in range(args.num_samples_HMC):
+        for inet in range(args.total_num_samples_HMC):
 
             # load layer weight and bias
             for name, layer in net.named_modules():
@@ -104,19 +96,31 @@ def save_softmax_probs_HMC(args):
                 data[indices, :] = x
 
     # save softmax_probs
-    model_folder = os.path.join(args.output_dir, args.eval_folder)
+    model_folder = os.path.join(args.output_dir, f"{args.case}", "eval_HMC")
     if not os.path.exists(model_folder):
         os.makedirs(model_folder)
     softmax_path = str(
         pathlib.Path(
-            os.path.join(model_folder, f"softmax_probs_HMC_{eval_dataset.get_identifier()}.pt")
+            os.path.join(model_folder, f"softmax_probs_HMC_domain_{args.domain}_case_{args.case}.pt")
         ).absolute()
     )
     print(f"Saving softmax at {softmax_path}")
     torch.save(softmax_probs, softmax_path)
 
     # save data
-    torch.save(data, os.path.join(model_folder, f"data_{eval_dataset.get_identifier()}.pt"))
+    data_path = str(
+        pathlib.Path(
+            os.path.join(model_folder, f"data_domain_{args.domain}_case_{args.case}.pt")
+        ).absolute()
+    )
+    torch.save(data, data_path)
 
-    with open(os.path.join(model_folder, f"args_{eval_dataset.get_identifier()}.json"), "w") as f:
+    # save args
+    args_path = str(
+        pathlib.Path(
+            os.path.join(model_folder, f"args_domain_{args.domain}_case_{args.case}.json")
+        ).absolute()
+    )
+
+    with open(args_path, "w") as f:
         f.write(json.dumps(args.__dict__, indent=2))

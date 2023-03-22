@@ -14,7 +14,7 @@ import pathlib
 
 # import modules
 import HMC.train as train_HMC
-import stochastic_methods.train as train_all
+import stochastic_methods.train as train
 
 
 # str to bool type
@@ -37,23 +37,14 @@ def parse_args():
     # mode
     parser.add_argument(
         "--method",
-        choices=["HMC", "regular", "dropout", "np_dropout", "dropconnect", "multiswag"],
+        choices=["HMC", "regular", "dropout", "np_dropout", "dropconnect", "multiswa", "multiswag"],
         default="HMC",
     )
     
-
     # data
-    parser.add_argument(
-        "--num_data_train", type=int, default=2000, help="Number of train data points"
-    )
-    parser.add_argument(
-        "--num_data_eval", type=int, default=2000, help="Number of eval data points"
-    )
-
     parser.add_argument(
         "--case", type=int, default=1, help="The data case number"
     )
-
 
     # model
     parser.add_argument("--input_dim", type=int, default=2, help="Input data")
@@ -64,7 +55,6 @@ def parse_args():
     parser.add_argument("--num_hidden_layers", type=int, default=2, help="Number of hidden layers")
     parser.add_argument("--device", choices=["cpu", "cuda"], default="cuda", help='["cpu", "cuda"]')
     
-
     # HMC
     parser.add_argument("--number_samples", type=int, default=2000, help="Number of HMC samples")
     parser.add_argument("--warmup_steps", type=int, default=2000, help="Warmup steps")
@@ -84,7 +74,7 @@ def parse_args():
     parser.add_argument("--drop_rate", type=float, default=0, help="Dropout rate")
     parser.add_argument("--lambda_prior", type=float, default=1.0, help="lambda prior value")
 
-    # swa and swag
+    # multiswa and multiswag
     parser.add_argument("--swa_swag_lr1", type=float, default=0.001, help="Top learning rate for swa and swag")
     parser.add_argument("--swa_swag_lr2", type=float, default=0.001, help="Bottom learning rate for swa and swag")
     parser.add_argument("--swa_swag_cycle_epochs", type=int, default=1, help="Number of epochs per swa(g) learning cycle")
@@ -95,21 +85,13 @@ def parse_args():
     parser.add_argument("--prefix", type=str, default="toy")
 
     # data folder
-    parser.add_argument("--data_folder", type=str, default="/cephyr/users/olebal/Alvis/multimodal-ensemble-learning/toy/plot/HMC/data", help="Data folder")
-
-    # train folder
-    parser.add_argument(
-        "--train_folder", type=str, default="/mimer/NOBACKUP/groups/snic2022-22-448/CVPR_revision/toy_olebal_SWAG_lr001", help="Folder for saving trained networks"
-    )
+    parser.add_argument("--data_folder", type=str, default="./train_datasets", help="Data folder")
 
     # debug mode?
     parser.add_argument("--fast", action="store_true", help="Minimal run to test code")
     parser.add_argument("--enable_wandb", action="store_true", help="Enable WandB logging")
 
     args = parser.parse_args()
-
-    if args.train_folder is None:
-        args.train_folder = f"train_toy_{args.method}"
 
     if args.fast:
         args.num_data_train = 10
@@ -135,7 +117,9 @@ def parse_args():
 # MAIN METHOD
 def main():
     """
-    MAIN PROCEDURE
+        
+        MAIN PROCEDURE
+    
     """
 
     # Parse the arguments
@@ -166,9 +150,14 @@ def main():
     # HMC
     if args.method == "HMC":
         train_HMC.train_HMC(args)
-    # other methods
+    
+    # multiswag
+    elif args.method == "multiswa" or args.method == "multiswag":
+        train.train_multiswag(args, wandb_config)
+
+    # ens    
     else:
-        train_all.train_ens(args, wandb_config)
+        train.train_ens(args, wandb_config)
 
 
 # RUN

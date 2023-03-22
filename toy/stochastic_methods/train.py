@@ -10,6 +10,7 @@ import json
 import pathlib
 
 # import modules
+from data.data import load_train_data
 from data.datasets import ToyDataset
 import stochastic_methods.model as model
 
@@ -24,10 +25,9 @@ def train_ens(args, wandb_config):
     # torch random seed
     torch.manual_seed(args.seed)
 
-    # create the datasets
-    x_train = torch.load(pathlib.Path(os.path.join(args.data_folder, f"x_train_{args.case}.pt")))
-    y_train = torch.load(pathlib.Path(os.path.join(args.data_folder, f"y_train_{args.case}.pt")))
-    
+
+    # create the dataset
+    x_train, y_train = load_train_data(args)
     train_dataset = ToyDataset(x_train, y_train)
 
     # loaders
@@ -73,103 +73,107 @@ def train_ens(args, wandb_config):
                 )
             )
 
-        # swa or swag
-        if args.method == "multiswag":
-
-            # init params
-            num_swa_models = 1
-            sum_state_dict = copy.deepcopy(net.state_dict())
-            sum_square_state_dict = copy.deepcopy(net.state_dict())
-            layer_names = list(sum_state_dict.keys())
-            for layer_name in layer_names:
-                sum_square_state_dict[layer_name] = torch.square(sum_state_dict[layer_name])
-
-            # train swag
-            for iepoch in range(args.swa_swag_total_epochs):
-
-                # swa-cycle learning rate scheduler
-                t = ( iepoch % args.swa_swag_cycle_epochs)/args.swa_swag_cycle_epochs
-                learning_rate = (1-t)*args.swa_swag_lr1 + t*args.swa_swag_lr2
-                optimizer = torch.optim.Adam(net.parameters(), lr=learning_rate)
-
-                # train
-                train_loss, train_loss_class, train_loss_prior = train_one_epoch(net, train_dataset, train_loader, optimizer, args)
-                wandb.log(
-                    dict(
-                        loss_prior=train_loss_prior,
-                        loss_class=train_loss_class,
-                        loss=train_loss,
-                        learning_rate=learning_rate,
-                        epoch=iepoch,
-                    )
-                )
-
-                # update swa weights
-                if t == 0.0:
-                    update_swa_params(net, sum_state_dict,  sum_square_state_dict)
-                    num_swa_models += 1
-
-            # save swa model
-            model_folder = create_folder(args, "swa")
-            model_path = str(
-                pathlib.Path(os.path.join(model_folder, f"model_id_{model_id}.pt")).absolute()
-            )
-            print(f"Saving swa model at {model_path}")
-            torch.save(get_mean_model(sum_state_dict, num_swa_models), model_path)
-
-            # sample swag model
-            model_folder = create_folder(args, "swag")
-            model_path = str(
-                pathlib.Path(os.path.join(model_folder, f"model_id_{model_id}.pt")).absolute()
-            )
-            print(f"Saving swag model at {model_path}")
-            torch.save(sample_swag_model(sum_state_dict, sum_square_state_dict, num_swa_models), model_path)
-            
-            model_path = str(
-                pathlib.Path(os.path.join(model_folder, f"sum_sq_model_{model_id}.pt")).absolute()
-            )
-            torch.save(sum_square_state_dict, model_path)
-
-            model_path = str(
-                pathlib.Path(os.path.join(model_folder, f"sum_model_{model_id}.pt")).absolute()
-            )
-            torch.save(sum_state_dict, model_path)
-
         # save model
-        else:
-            # save model
-            model_folder = create_folder(args, args.method)
-            model_path = str(
-                pathlib.Path(os.path.join(model_folder, f"model_id_{model_id}.pt")).absolute()
-            )
-            print(f"Saving model at {model_path}")
-            torch.save(net.state_dict(), model_path)
-
+        model_folder = create_folder(args, args.method)
+        model_path = str(
+            pathlib.Path(os.path.join(model_folder, f"model_id_{model_id}.pt")).absolute()
+        )
+        print(f"Saving model at {model_path}")
+        torch.save(net.state_dict(), model_path)
 
         print("Net: ", model_id, " Loss: ", train_loss)
         wandb_run.finish()
 
 
-def sample_swag_model(sum_state_dict, sum_square_state_dict, num_swa_models, var_clamp=1e-16):
+# train multiswag
+def train_multiswag(args, wandb_config):
 
-    with torch.no_grad():
-        res = copy.deepcopy(sum_state_dict)
+    # load models
+    nets = load_nets(args):
+
+    # train multiswag
+    for net in nets:
+        
+        # init params
+        num_swa_models = 1
+        sum_state_dict = copy.deepcopy(net.state_dict())
+        sum_square_state_dict = copy.deepcopy(net.state_dict())
         layer_names = list(sum_state_dict.keys())
         for layer_name in layer_names:
+            sum_square_state_dict[layer_name] = torch.square(sum_state_dict[layer_name])
 
-            var = sum_square_state_dict[layer_name]/num_swa_models - (sum_state_dict[layer_name]/num_swa_models)**2
-            var = torch.clamp(var, var_clamp)
-            res[layer_name] = torch.normal(
-                sum_state_dict[layer_name]/num_swa_models, # mean
-                torch.sqrt(var), # std
+        # train swag
+        for iepoch in range(args.swa_swag_total_epochs):
+
+            # swa-cycle learning rate scheduler
+            t = ( iepoch % args.swa_swag_cycle_epochs)/args.swa_swag_cycle_epochs
+            learning_rate = (1-t)*args.swa_swag_lr1 + t*args.swa_swag_lr2
+            optimizer = torch.optim.Adam(net.parameters(), lr=learning_rate)
+
+            # train
+            train_loss, train_loss_class, train_loss_prior = train_one_epoch(net, train_dataset, train_loader, optimizer, args)
+            wandb.log(
+                dict(
+                    loss_prior=train_loss_prior,
+                    loss_class=train_loss_class,
+                    loss=train_loss,
+                    learning_rate=learning_rate,
+                    epoch=iepoch,
+                )
             )
 
-    return res
+            # update swa weights
+            if t == 0.0:
+                update_swa_params(net, sum_state_dict,  sum_square_state_dict)
+                num_swa_models += 1
+
+        # save swa model
+        args.num_swa_models = num_swa_models
+        model_folder = create_folder(args, "multiswa")
+        model_path = str(
+            pathlib.Path(os.path.join(model_folder, f"model_id_{model_id}.pt")).absolute()
+        )
+        print(f"Saving swa model at {model_path}")
+        torch.save(get_mean_model(sum_state_dict, num_swa_models), model_path)
+
+        # save swag model
+        model_folder = create_folder(args, "multiswag")
+        model_path = str(
+            pathlib.Path(os.path.join(model_folder, f"sum_sq_model_{model_id}.pt")).absolute()
+        )
+        torch.save(sum_square_state_dict, model_path)
+
+        model_path = str(
+            pathlib.Path(os.path.join(model_folder, f"sum_model_{model_id}.pt")).absolute()
+        )
+        torch.save(sum_state_dict, model_path)
+
+        print("Net: ", model_id, " Loss: ", train_loss)
+        wandb_run.finish()
+
+# load nets
+def load_nets(args):
+
+    nets = []
+    model_folder = create_folder(args, "regular")
+    for model_id in range(args.num_samples_ens):
+
+        net = model.train_create_net(args)
+        model_path = str(
+            pathlib.Path(os.path.join(model_folder, f"model_id_{model_id}.pt")).absolute()
+        )
+        net.load_state_dict(torch.load(model_path))
+        net.to(args.device)
+        net.train()
+        nets.append(net)
+
+    return nets
 
 
 def create_folder(args, method):
+
     # create the output folder
-    model_folder = os.path.join(args.output_dir, args.train_folder, f"{args.case}", method)
+    model_folder = os.path.join(args.output_dir, f"{args.case}", method)
     if not os.path.exists(model_folder):
         os.makedirs(model_folder)
 
@@ -245,7 +249,7 @@ def train_one_epoch(net, train_dataset, train_loader, optimizer, args):
 
 def l2_drop_rate(args, layer_name):
 
-    if (args.method == "regular" or args.method == "multiswag"):
+    if (args.method == "regular" or args.method == "multiswa" or args.method == "multiswag"):
         return 1
 
     if args.method == "dropout":

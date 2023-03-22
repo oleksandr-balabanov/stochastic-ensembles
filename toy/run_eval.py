@@ -13,8 +13,8 @@ import pathlib
 
 # import modules
 import HMC.eval as eval_HMC
-import stochastic_methods.eval as eval_all
-import plot.plot_uncertainty_metrics as plot_uncertainty_metrics
+import stochastic_methods.eval as eval
+#import plot.plot_uncertainty_metrics as plot_uncertainty_metrics
 
 
 # str to bool type
@@ -37,46 +37,46 @@ def parse_args():
     # mode
     parser.add_argument(
         "--method",
-        choices=["HMC", "regular", "dropout", "np_dropout", "dropconnect"],
+        choices=["HMC", "regular", "dropout", "np_dropout", "dropconnect", "multiswa", "multiswag"],
         default="regular",
     )
 
     # data
     parser.add_argument(
-        "--num_data_train", type=int, default=2000, help="Number of train data points"
+        "--case", type=int, default=1, help="The data case number"
     )
+
     parser.add_argument(
-        "--num_data_eval", type=int, default=2000, help="Number of eval data points"
+        "--size_grid", type=int, default=100, help="Number of eval grid points per side"
     )
+
     parser.add_argument(
-        "--eval_scaling_factors",
-        nargs="+",
-        default=["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"],
-        help="Eval scaling factors",
+        "--domain", choices=["in", "out"], default="in", help="In-domain [-1, 1]**2 or out-of-domain [-10, 10]**2 test data"
     )
+
 
     # model
     parser.add_argument("--input_dim", type=int, default=2, help="Input data")
     parser.add_argument("--num_classes", type=int, default=2, help="Output classes")
-    parser.add_argument(
-        "--hidden_dim", type=int, default=10, help="Number of hidden neurons (per layer)"
-    )
+    parser.add_argument("--hidden_dim", type=int, default=10, help="Number of hidden neurons (per layer)")
     parser.add_argument("--num_hidden_layers", type=int, default=2, help="Number of hidden layers")
     parser.add_argument("--device", choices=["cpu", "cuda"], default="cuda", help='["cuda", "cpu"]')
     parser.add_argument("--drop_rate", type=float, default=0, help="Dropout rate")
 
-    # evaluation
-    parser.add_argument(
-        "--num_samples_pass",
-        type=int,
-        default=1,
-        help="Number of stochastic forward passes per net",
-    )
-    parser.add_argument(
-        "--num_samples_ens", type=int, default=1024, help="Number of nets in the ensemble"
-    )
-    parser.add_argument("--num_samples_HMC", type=int, default=1024, help="Number of HMC samples")
+    # ens evaluation
+    parser.add_argument("--num_samples_pass",type=int,default=1,help="Number of stochastic forward passes per net")
+    parser.add_argument("--num_samples_ens", type=int, default=1024, help="Number of nets in the ensemble")
     parser.add_argument("--eval_batch", type=int, default=256, help="Eval batch size")
+
+    # HMC 
+    parser.add_argument("--number_samples", type=int, default=2000, help="Number of HMC samples")
+    parser.add_argument("--warmup_steps", type=int, default=2000, help="Warmup steps")
+    parser.add_argument("--number_chains", type=int, default=4, help="Parallel HMC chains")
+    parser.add_argument("--total_num_samples_HMC", type=int, default=8000, help="Total number of HMC samples, including all chains")
+
+    # multiswag
+    parser.add_argument("--num_swa_models",type=int,default=2000,help="Number of models used for calculating Stochastic Weight Average")
+    parser.add_argument("--num_swag_samples", type=int, default=20, help="Number of samples created per swag model")
 
     # reload softmax probabilities?
     parser.add_argument(
@@ -86,26 +86,6 @@ def parse_args():
         help="Compute and save the softmax probs?",
     )
 
-    # plot
-    parser.add_argument(
-        "--plot_scaling_factors",
-        nargs="+",
-        default=None,
-        help="Plot scaling factors (for the error to HMC plot)",
-    )
-    parser.add_argument(
-        "--plot_scaling_factor",
-        type=int,
-        default=None,
-        help="Plot scaling factor (for the raw entropy and mutual info plots)",
-    )
-    parser.add_argument(
-        "--eval_folder_HMC",
-        type=str,
-        default=None,
-        help="Folder for loading HMC eval results when plotting the error to HMC plot",
-    )
-
     # general folders
     parser.add_argument("--output_dir", type=str, default="./output")
     parser.add_argument("--prefix", type=str, default="toy")
@@ -113,27 +93,7 @@ def parse_args():
     # data folder
     parser.add_argument("--data_folder", type=str, default="datasets/", help="The data folder")
 
-    # train folder
-    parser.add_argument(
-        "--train_folder", type=str, default=None, help="Folder for saving trained networks"
-    )
-
-    # eval folder
-    parser.add_argument(
-        "--eval_folder", type=str, default=None, help="Folder for saving eval results"
-    )
-
     args = parser.parse_args()
-
-    if args.train_folder is None:
-        args.train_folder = f"train_toy_{args.method}"
-
-    if args.eval_folder is None:
-        args.eval_folder = f"eval_{args.method}"
-
-    # for plotting only
-    if args.eval_folder_HMC is None:
-        args.eval_folder_HMC = f"eval_HMC"
 
     return args
 
@@ -141,7 +101,9 @@ def parse_args():
 # MAIN METHOD
 def main():
     """
-    MAIN PROCEDURE
+
+        MAIN PROCEDURE
+    
     """
 
     # Parse the arguments
@@ -162,21 +124,9 @@ def main():
     # softmax probs
     if args.compute_save_softmax_probs:
         if args.method == "HMC":
-            eval_HMC.save_all_softmax_probs_HMC(args)
+            eval_HMC.save_softmax_probs_HMC(args)
         else:
-            eval_all.save_all_softmax_probs(args)
-
-    # creates plots
-    if args.plot_scaling_factors != None:
-        plot_uncertainty_metrics.compute_and_save_abs_mean_error_to_HMC(
-            args, args.plot_scaling_factors
-        )
-
-    if args.plot_scaling_factor != None:
-        plot_uncertainty_metrics.compute_and_plot_entropy_mutual_info(
-            args, args.plot_scaling_factor
-        )
-
+            eval.save_softmax_probs(args)
 
 # RUN
 if __name__ == "__main__":

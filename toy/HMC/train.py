@@ -1,5 +1,7 @@
-"""s
-	TRAIN MODULE (PYRO)
+"""
+
+	TRAIN HMC (NUTS)
+
 """
 
 # torch
@@ -16,14 +18,16 @@ import pyro.poutine as poutine
 
 # import modules
 import HMC.model as model
+from data.data import load_train_data
 from data.datasets import ToyDataset
-
 
 
 # train pyro model with HMC
 def train_HMC(args):
     """
-    TRAIN PROCEDURE (HMC)
+
+        TRAIN PROCEDURE (HMC)
+    
     """
 
     # pyro
@@ -34,14 +38,13 @@ def train_HMC(args):
     pyro.set_rng_seed(args.seed)
 
     # create the datasets
-    x_train = torch.load(pathlib.Path(os.path.join(args.data_folder, f"x_train_{args.case}.pt")))
-    y_train = torch.load(pathlib.Path(os.path.join(args.data_folder, f"y_train_{args.case}.pt")))
-    
+    x_train, y_train = load_train_data(args)
+
     # device
     device = args.device
 
     # create the output folder
-    model_folder = os.path.join(args.output_dir, args.train_folder, f"{args.case}", "HMC")
+    model_folder = os.path.join(args.output_dir, f"{args.case}", "HMC")
     if not os.path.exists(model_folder):
         os.makedirs(model_folder)
 
@@ -73,6 +76,7 @@ def train_HMC(args):
         adapt_step_size = args.adapt_step_size,
         jit_compile=False,
     )
+
     mcmc = MCMC(
         nuts_kernel,
         num_samples=args.number_samples,
@@ -92,7 +96,7 @@ def train_HMC(args):
         print(v.shape)
         serialisable[k] = v.tolist()
 
-    model_file_name = str(pathlib.Path(os.path.join(model_folder, f"model_HMC_chains_{args.number_chains}_s_{args.number_samples}_w_{args.warmup_steps}_ss_{args.step_size}.json")).absolute())
+    model_file_name = str(pathlib.Path(os.path.join(model_folder, f"model_HMC_chains_{args.number_chains}_s_{args.number_samples}_w_{args.warmup_steps}_case_{args.case}.json")).absolute())
     print(f"Saving HMC models at {model_file_name}")
     with open(model_file_name, "w") as model_file:
         json.dump(serialisable, model_file)
@@ -100,11 +104,22 @@ def train_HMC(args):
 
     # convergence statistics 
     diag = mcmc.diagnostics()
-    model_file_name = str(pathlib.Path(os.path.join(model_folder, f"diagnostics_HMC_chains_{args.number_chains}_s_{args.number_samples}_w_{args.warmup_steps}_ss_{args.step_size}.dill")).absolute())
+    model_file_name = str(pathlib.Path(os.path.join(model_folder, f"diagnostics_HMC_chains_{args.number_chains}_s_{args.number_samples}_w_{args.warmup_steps}_case_{args.case}.dill")).absolute())
     with open(model_file_name, 'wb') as f:
 	    dill.dump(diag, f)
+
+
+    # save args
+    args_path = str(
+        pathlib.Path(
+            os.path.join(model_folder, f"args_domain_{args.domain}_case_{args.case}.json")
+        ).absolute()
+    )
+
+    with open(args_path, "w") as f:
+        f.write(json.dumps(args.__dict__, indent=2))
     
+    print("Convergence statistics: ")
     print(diag)
-    torch.cuda.empty_cache() 
 
     
