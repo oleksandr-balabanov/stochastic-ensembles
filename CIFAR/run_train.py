@@ -63,9 +63,9 @@ def parse_args():
 
     # training
     parser.add_argument('--lr', type=float, default=0.1, help='The learning rate')
-    parser.add_argument('--train_batch', type=int, default=64, help='The training batch size')
+    parser.add_argument('--train_batch', type=int, default=128, help='The training batch size')
     parser.add_argument('--test_batch', type=int, default=256, help='The training batch size')
-    parser.add_argument('--total_epochs', type=int, default=300, help='Total number of epochs')
+    parser.add_argument('--total_epochs', type=int, default=600, help='Total number of epochs')
     parser.add_argument('--num_train', type=int, default=40960, help='Number of images used for the training')
     parser.add_argument('--shuffle', type=str2bool, default=True, help='Shuffle the data')
     parser.add_argument('--device', type=str, default="cuda", help='cpu or cuda?')
@@ -79,11 +79,11 @@ def parse_args():
 
 
     # multiswa and multiswag
-    parser.add_argument("--swa_swag_lr1", type=float, default=0.03, help="Top learning rate for swa and swag")
-    parser.add_argument("--swa_swag_lr2", type=float, default=0.03, help="Bottom learning rate for swa and swag")
+    parser.add_argument("--swa_swag_lr1", type=float, default=0.005, help="Top learning rate for swa and swag")
+    parser.add_argument("--swa_swag_lr2", type=float, default=0.005, help="Bottom learning rate for swa and swag")
     parser.add_argument("--swa_swag_cycle_epochs", type=int, default=1, help="Number of epochs per swa(g) learning cycle")
     parser.add_argument("--swa_swag_total_epochs", type=int, default=300, help="Total number of epochs for swa(g) protocol")
-
+    
 
     # save to the file
     parser.add_argument('--train_folder', type=str, default="models_best")

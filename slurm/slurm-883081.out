@@ -1,0 +1,8 @@
+This job can be monitored from: https://scruffy.c3se.chalmers.se/d/alvis-job/alvis-job?var-jobid=883081&from=1679492300000
+################################################################################
+Running slurm job
+################################################################################
+INFO:    underlay of /usr/bin/nvidia-smi required more than 50 (564) bind mounts
+INFO:    underlay of /usr/share/lmod/lmod required more than 50 (92) bind mounts
+SEED:  182
+Saving softmax at /mimer/NOBACKUP/groups/snic2022-22-448/CVPR_revision/toy_olebal_2/2/eval_np_dropout/softmax_probs_np_dropout_domain_out_case_2.pt

@@ -39,22 +39,6 @@ def save_softmax_probs_CIFAR(args):
     with open(get_eval_folder(args) / f"args_nn{args.num_nets:02d}.json", "w") as f:
         f.write(json.dumps(args.__dict__, indent=2))
 
-    
-def load_nets(args):
-    
-    # get the model folder
-    model_folder = get_model_folder(args)
-
-    # load
-    nets=[]
-    for inet in range(args.num_nets):
-        net = create_model.create_resnet20(args)
-        net.load_state_dict(torch.load(model_folder / f'model_{inet}.pt'))
-        net.train()
-        nets.append(net)
-
-    return nets
-
 
 
 # output softmax probs associated with CIFAR10, CIFAR100, SVHN sets
@@ -265,7 +249,7 @@ def load_nets(args):
 
     if args.method != "multiswag":
         nets = []
-        model_folder = create_folder(args, args.method)
+        model_folder = create_folder(args, args.method, save_args = False)
         for model_id in range(args.num_nets):
 
             net = create_model.create_resnet20(args)
@@ -285,7 +269,7 @@ def load_nets(args):
 def load_multiswag_nets(args):
 
     nets = []
-    model_folder = create_folder(args, args.method)
+    model_folder = create_folder(args, args.method, save_args = False)
     for model_id in range(args.num_nets):
 
         model_path = os.path.join(model_folder, f"sum_model_{model_id}.pt")
@@ -325,7 +309,7 @@ def sample_swag_model(sum_state_dict, sum_square_state_dict, num_swa_models, var
     return res
 
 
-def create_folder(args, method):
+def create_folder(args, method, save_args = True):
 
     # create the output folder
     if args.do_augmentation_train == True:
@@ -338,9 +322,10 @@ def create_folder(args, method):
     if not os.path.exists(model_folder):
         os.makedirs(model_folder)
 
-    args_file = pathlib.Path(os.path.join(model_folder, "args.json"))
-    with open(args_file, "w") as f:
-        f.write(json.dumps(args.__dict__, indent=2))
+    if save_args:
+        args_file = pathlib.Path(os.path.join(model_folder, "args.json"))
+        with open(args_file, "w") as f:
+            f.write(json.dumps(args.__dict__, indent=2))
 
     return model_folder
 

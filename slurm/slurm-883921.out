@@ -1,0 +1,35 @@
+This job can be monitored from: https://scruffy.c3se.chalmers.se/d/alvis-job/alvis-job?var-jobid=883921&from=1679508234000
+################################################################################
+Running slurm job
+################################################################################
+INFO:    underlay of /usr/bin/nvidia-smi required more than 50 (564) bind mounts
+INFO:    underlay of /usr/share/lmod/lmod required more than 50 (92) bind mounts
+SEED:  tensor([219])
+MULTISWA(G) SEED:  279
+
+Train set: Avg. total loss: 0.0571, Accuracy: 40960/40960 (100%), SWA Epoch: 0
+Valid set: Avg. predictive loss: 0.7072, Accuracy: 83%, SWA Epoch: 0 
+
+Saving swa model at /mimer/NOBACKUP/groups/snic2022-22-448/uncertainty/CIFAR_10_multiswag_300_005_2/models_best/CIFAR10/multiswa/model_0.pt
+
+Test set (last): Avg. predictive loss: 0.7231, Accuracy: 8294/10000 (83%)
+Test set (regular): Avg. predictive loss: 0.7231, Accuracy: 83%, Epoch: 0 
+
+
+Test set (last): Avg. predictive loss: 0.7227, Accuracy: 8299/10000 (83%)
+Test set (swa): Avg. predictive loss: 0.7227, Accuracy: 83%, Epoch: 0 
+
+
+Train set: Avg. total loss: 0.0542, Accuracy: 40960/40960 (100%), SWA Epoch: 0
+Valid set: Avg. predictive loss: 0.7886, Accuracy: 83%, SWA Epoch: 0 
+
+Saving swa model at /mimer/NOBACKUP/groups/snic2022-22-448/uncertainty/CIFAR_10_multiswag_300_005_2/models_best/CIFAR10/multiswa/model_1.pt
+
+Test set (last): Avg. predictive loss: 0.8275, Accuracy: 8294/10000 (83%)
+Test set (regular): Avg. predictive loss: 0.8275, Accuracy: 83%, Epoch: 0 
+
+
+Test set (last): Avg. predictive loss: 0.8283, Accuracy: 8293/10000 (83%)
+Test set (swa): Avg. predictive loss: 0.8283, Accuracy: 83%, Epoch: 0 
+
+slurmstepd: error: *** JOB 883921 ON alvis2-02 CANCELLED AT 2023-03-22T19:05:19 ***

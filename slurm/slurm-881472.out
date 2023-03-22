@@ -1,10 +1,10 @@
-This job can be monitored from: https://scruffy.c3se.chalmers.se/d/alvis-job/alvis-job?var-jobid=881469&from=1679454430000
+This job can be monitored from: https://scruffy.c3se.chalmers.se/d/alvis-job/alvis-job?var-jobid=881472&from=1679456148000
 ################################################################################
 Running slurm job
 ################################################################################
 INFO:    underlay of /usr/bin/nvidia-smi required more than 50 (564) bind mounts
 INFO:    underlay of /usr/share/lmod/lmod required more than 50 (92) bind mounts
-SEED:  tensor([277])
+SEED:  tensor([607])
 CIFAR mode:  CIFAR10
 stochastic method:  multiswag
 Corruption [0:16] fog.npy, level 0
@@ -62,4 +62,3 @@ Corruption [10:16] saturate.npy, level 1
 Corruption [10:16] saturate.npy, level 2
 Corruption [10:16] saturate.npy, level 3
 Corruption [10:16] saturate.npy, level 4
-Corruption [11:16] brightness.npy, level 0

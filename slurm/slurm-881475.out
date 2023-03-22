@@ -1,11 +1,11 @@
-This job can be monitored from: https://scruffy.c3se.chalmers.se/d/alvis-job/alvis-job?var-jobid=881469&from=1679454430000
+This job can be monitored from: https://scruffy.c3se.chalmers.se/d/alvis-job/alvis-job?var-jobid=881475&from=1679475368000
 ################################################################################
 Running slurm job
 ################################################################################
 INFO:    underlay of /usr/bin/nvidia-smi required more than 50 (564) bind mounts
 INFO:    underlay of /usr/share/lmod/lmod required more than 50 (92) bind mounts
-SEED:  tensor([277])
-CIFAR mode:  CIFAR10
+SEED:  tensor([902])
+CIFAR mode:  CIFAR100
 stochastic method:  multiswag
 Corruption [0:16] fog.npy, level 0
 Corruption [0:16] fog.npy, level 1
@@ -41,25 +41,3 @@ Corruption [6:16] defocus_blur.npy, level 0
 Corruption [6:16] defocus_blur.npy, level 1
 Corruption [6:16] defocus_blur.npy, level 2
 Corruption [6:16] defocus_blur.npy, level 3
-Corruption [6:16] defocus_blur.npy, level 4
-Corruption [7:16] elastic_transform.npy, level 0
-Corruption [7:16] elastic_transform.npy, level 1
-Corruption [7:16] elastic_transform.npy, level 2
-Corruption [7:16] elastic_transform.npy, level 3
-Corruption [7:16] elastic_transform.npy, level 4
-Corruption [8:16] gaussian_blur.npy, level 0
-Corruption [8:16] gaussian_blur.npy, level 1
-Corruption [8:16] gaussian_blur.npy, level 2
-Corruption [8:16] gaussian_blur.npy, level 3
-Corruption [8:16] gaussian_blur.npy, level 4
-Corruption [9:16] frost.npy, level 0
-Corruption [9:16] frost.npy, level 1
-Corruption [9:16] frost.npy, level 2
-Corruption [9:16] frost.npy, level 3
-Corruption [9:16] frost.npy, level 4
-Corruption [10:16] saturate.npy, level 0
-Corruption [10:16] saturate.npy, level 1
-Corruption [10:16] saturate.npy, level 2
-Corruption [10:16] saturate.npy, level 3
-Corruption [10:16] saturate.npy, level 4
-Corruption [11:16] brightness.npy, level 0

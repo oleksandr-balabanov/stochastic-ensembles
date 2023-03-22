@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 export IMAGE=/mimer/NOBACKUP/groups/snic2022-22-448/uncertainty/containers/s.img
-export OUTPUT=/mimer/NOBACKUP/groups/snic2022-22-448/CVPR_revision/toy_multiswag_2000_0005/
+export OUTPUT=/mimer/NOBACKUP/groups/snic2022-22-448/CVPR_revision/toy_olebal_2/
 export WANDB_CACHE_DIR=/mimer/NOBACKUP/groups/snic2022-22-448/uncertainty/wandb_cache
 export WANDB_OUTPUT=/mimer/NOBACKUP/groups/snic2022-22-448/uncertainty/
 export SLURM_PROJECT="${SLURM_PROJECT:-SNIC2022-22-448}"

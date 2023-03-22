@@ -27,7 +27,7 @@ def train_ens_CIFAR(args, wandb_config):
         Input: args, wandb_config
         Output: None
 
-        (saved to os.path.join(model_folder, f'model_{inet}.pt') )
+        (saved to os.path.join(model_folder, f'model_{model_id}.pt') )
 
     """
 
@@ -45,7 +45,7 @@ def train_ens_CIFAR(args, wandb_config):
     model_folder = create_folder(args, args.method)
 
     # loop over the nets
-    for inet in range(args.num_nets):
+    for model_id in range(args.num_nets):
 
         wandb_run = wandb.init(**wandb_config, reinit=True)
         
@@ -80,7 +80,7 @@ def train_ens_CIFAR(args, wandb_config):
                 optimizer = torch.optim.SGD(net.parameters(), lr=learning_rate, momentum=0.9, nesterov = True)
 
             # train
-            train_loss, train_accuracy = train_one_epoch(net, train_dataset, trainLoader, optimizer, args)
+            train_loss, train_accuracy, train_correct = train_one_epoch(net, train_dataset, trainLoader, optimizer, args)
             loss_train.append(train_loss)
             accuracy_train.append(train_accuracy)
 
@@ -109,7 +109,7 @@ def train_ens_CIFAR(args, wandb_config):
 
         # save
         model_path = str(
-            pathlib.Path(os.path.join(model_folder, f'model_{inet}.pt')).absolute()
+            pathlib.Path(os.path.join(model_folder, f'model_{model_id}.pt')).absolute()
         )
         torch.save(net.state_dict(), model_path)
 
@@ -133,9 +133,10 @@ def train_multiswag_CIFAR(args, wandb_config):
         Input: args, wandb_config
         Output: None
 
-        (saved to os.path.join(model_folder, f'model_{inet}.pt') )
+        (saved to os.path.join(model_folder, f'model_{model_id}.pt') )
 
     """
+    
 
     # load pretrained nets
     nets = load_nets(args)    
@@ -149,7 +150,7 @@ def train_multiswag_CIFAR(args, wandb_config):
     testLoader = torch.utils.data.DataLoader(test_dataset, batch_size=args.test_batch, shuffle=False)
 
     # loop over the nets
-    for inet in range(args.num_nets):
+    for model_id in range(args.num_nets):
 
         wandb_run = wandb.init(**wandb_config, reinit=True)
         # train quantities
@@ -157,7 +158,7 @@ def train_multiswag_CIFAR(args, wandb_config):
         accuracy_train = []
 
         # pretrained resnet20
-        net = nets[inet]
+        net = nets[model_id]
 
         # device
         device = args.device
@@ -183,7 +184,7 @@ def train_multiswag_CIFAR(args, wandb_config):
             train_loss = 0
             train_correct = 0
             net.train()
-            train_loss, train_accuracy = train_one_epoch(net, train_dataset, trainLoader, optimizer, args)
+            train_loss, train_accuracy, train_correct = train_one_epoch(net, train_dataset, trainLoader, optimizer, args)
             loss_train.append(train_loss)
             accuracy_train.append(train_accuracy)
 
@@ -243,14 +244,13 @@ def train_multiswag_CIFAR(args, wandb_config):
             test_loss=test_loss,
             test_accuracy=test_accuracy,
         ))
-        wandb_run.finish()
 
         print('Test set (regular): Avg. predictive loss: {:.4f}, Accuracy: {:.0f}%, Epoch: {} \n'.format(
             test_loss, test_accuracy, epoch)
         )
 
         # swa model
-        net = load_state_dict(get_mean_model(sum_state_dict, num_swa_models))
+        net.load_state_dict(get_mean_model(sum_state_dict, num_swa_models))
         test_loss, test_accuracy = test_model(args, net, testLoader)
         wandb.log(dict(
             test_loss_swa=test_loss,
@@ -270,6 +270,7 @@ def train_one_epoch(net, train_dataset, train_loader, optimizer, args):
     train_loss = 0
     train_correct = 0
     net.train()
+    device = args.device
     
     for batch, (data, targets) in enumerate(train_loader):
         # to CUDA
@@ -300,7 +301,7 @@ def train_one_epoch(net, train_dataset, train_loader, optimizer, args):
     train_loss /= len(train_loader)
     train_accuracy = 100. * train_correct / len(train_loader.dataset)
 
-    return train_loss, train_accuracy
+    return train_loss, train_accuracy, train_correct
 
 
 def l2_loss(net, args, train_dataset):
@@ -427,7 +428,7 @@ def test_model(args, net, data_loader):
 # constant for l2 regularization
 def l2_drop_rate(method, drop_rate):
 
-    if (args.method == "regular" or args.method == "multiswa" or args.method == "multiswag"):
+    if (method == "regular" or method == "multiswa" or method == "multiswag"):
         return 1    
 
     if method == "dropout":  
@@ -444,24 +445,36 @@ def l2_drop_rate(method, drop_rate):
 def load_nets(args):
 
     nets = []
-    model_folder = create_folder(args, "regular")
-    for model_id in range(args.num_samples_ens):
+    model_folder = create_folder(args, "regular", save_args = False)
+    for model_id in range(args.num_nets):
 
         net = create_model.create_resnet20(args)
         model_path = str(
-            pathlib.Path(os.path.join(model_folder, f"model_id_{model_id}.pt")).absolute()
+            pathlib.Path(os.path.join(model_folder, f"model_{model_id}.pt")).absolute()
         )
         net.load_state_dict(torch.load(model_path))
         net.to(args.device)
         net.train()
         nets.append(net)
 
+    # load the same seed to synchronize the data partitioning (into train and valid) for regular and multiswag networks
+    args_file = str(
+        pathlib.Path(os.path.join(model_folder, "args.json")).absolute()
+    )
+    with open(args_file, "r") as f:
+        data = json.load(f)
+
+    torch.manual_seed(data["seed"])
+    args.seed = data["seed"]
+    print('MULTISWA(G) SEED: ', data["seed"])
+
+
     return nets
 
 
-def create_folder(args, method):
+def create_folder(args, method, save_args = True):
 
-    # create the output folder
+    # cifar mode
     if args.do_augmentation_train == True:
         cifar_mode = args.cifar_mode + "_aug"
     else:
@@ -472,9 +485,10 @@ def create_folder(args, method):
     if not os.path.exists(model_folder):
         os.makedirs(model_folder)
 
-    args_file = pathlib.Path(os.path.join(model_folder, "args.json"))
-    with open(args_file, "w") as f:
-        f.write(json.dumps(args.__dict__, indent=2))
+    if save_args:
+        args_file = pathlib.Path(os.path.join(model_folder, "args.json"))
+        with open(args_file, "w") as f:
+            f.write(json.dumps(args.__dict__, indent=2))
 
     return model_folder
 

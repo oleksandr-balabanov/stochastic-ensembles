@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 export BASE=/mimer/NOBACKUP/groups/snic2022-22-448/uncertainty/
 export IMAGE=/mimer/NOBACKUP/groups/snic2022-22-448/uncertainty/containers/s.img
-export OUTPUT=/mimer/NOBACKUP/groups/snic2022-22-448/uncertainty/CIFAR_10_multiswag_300_005/
+export OUTPUT=/mimer/NOBACKUP/groups/snic2022-22-448/uncertainty/CIFAR_10_multiswag_300_005_2/
 export WANDB_CACHE_DIR=/mimer/NOBACKUP/groups/snic2022-22-448/uncertainty/wandb_cache
 export WANDB_OUTPUT=/mimer/NOBACKUP/groups/snic2022-22-448/uncertainty/
 export SLURM_PROJECT="${SLURM_PROJECT:-SNIC2022-22-448}"
@@ -23,6 +23,8 @@ echo "##########################################################################
 set -e
 
 cd ${HOME}/stochastic_ensembles/stochastic-ensembles/CIFAR/
-singularity exec --cleanenv --no-home --env PYTHONNOUSERSITE=1 --nv ${IMAGE} python3 -u ./run_eval.py --output_dir ${OUTPUT} $@
+singularity exec --cleanenv --no-home --env PYTHONNOUSERSITE=1 --nv ${IMAGE} python3 -u ./run_train.py --output_dir ${OUTPUT} $@
 exit 0
 EOT
+
+# ./start_CIFAR.sh --method multiswag --cifar_mode CIFAR10 --drop_rate_conv 0
