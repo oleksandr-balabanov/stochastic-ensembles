@@ -1,8 +1,10 @@
 # Stochastic Ensembles
 
-"Bayesian posterior approximation with stochastic ensembles" by Oleksandr Balabanov, Bernhard Mehlig, and Hampus Linander.
+["Bayesian posterior approximation with stochastic ensembles"](https://arxiv.org/abs/2212.08123)
 
-## Basic description
+Oleksandr Balabanov, Bernhard Mehlig, and Hampus Linander, CVPR 2023.
+
+## Description
 
 1. Train and evaluate a stochastic ensemble of neural networks. The ensemble types cover Regular (Non-Stochastic), Monte Carlo Dropout, DropConnect, Non-Parametric Dropout. 
 
